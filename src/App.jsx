@@ -1,22 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-/* ======================
+/* ==================================================
    ADMIN LOGIN MODAL
-   ====================== */
+   ================================================== */
 function AdminLoginModal({ onClose, onSuccess }) {
   const [pin, setPin] = useState('');
 
-  // Reset PIN every time the modal mounts.
   useEffect(() => {
     setPin('');
   }, []);
 
   const handleSubmit = () => {
-    // Hardcoded PIN for demo: '1234'
     if (pin === '1234') {
       onSuccess();
     } else {
       alert('Incorrect PIN!');
+      setPin(''); // Reset immediately
     }
   };
 
@@ -49,28 +48,33 @@ function AdminLoginModal({ onClose, onSuccess }) {
   );
 }
 
-/* ======================
+/* ==================================================
    ADD ITEM MODAL (ADMIN)
-   ====================== */
+   ================================================== */
 function AddItemModal({ onClose, onAdd, existingCategories }) {
   const [name, setName] = useState('');
-  const [category, setCategory] = useState(''); // will be set via dropdown or new text
+  const [category, setCategory] = useState('');
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [price, setPrice] = useState('');
-  const [discount, setDiscount] = useState(''); // discount amount
+  const [discount, setDiscount] = useState('');
   const [file, setFile] = useState(null);
   const [isSpecial, setIsSpecial] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
+  // State for field tooltips
+  const [showNameHelp, setShowNameHelp] = useState(false);
+  const [showCategoryHelp, setShowCategoryHelp] = useState(false);
+  const [showPriceHelp, setShowPriceHelp] = useState(false);
+  const [showDiscountHelp, setShowDiscountHelp] = useState(false);
+
   const handleAdd = () => {
     const newItem = {
-      id: Date.now(), // For demo purposes; in production, DB auto-assigns ID.
+      id: Date.now(), // In a real DB, ID is auto-assigned.
       name,
       description: `Description for ${name}`,
-      category: category,
+      category,
       price: parseFloat(price) || 0,
       discount: parseFloat(discount) || 0,
-      // Use uploaded file if present; otherwise use a default placeholder.
       imagePath: file ? URL.createObjectURL(file) : '/images/placeholder.jpg',
       isSpecial,
       disabled
@@ -84,61 +88,116 @@ function AddItemModal({ onClose, onAdd, existingCategories }) {
       <div className="bg-white p-4 rounded shadow-md w-80">
         <h2 className="text-lg font-bold mb-4">Add New Item</h2>
         <div className="space-y-2">
-          <input
-            type="text"
-            className="border p-2 w-full"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {/* Category: if there are existing categories, show a dropdown */}
-          {existingCategories.length > 0 && !isCreatingCategory ? (
-            <select
-              className="border p-2 w-full"
-              value={category}
-              onChange={(e) => {
-                if (e.target.value === 'CREATE_NEW') {
-                  setIsCreatingCategory(true);
-                  setCategory('');
-                } else {
-                  setCategory(e.target.value);
-                }
-              }}
-            >
-              <option value="">Select Category</option>
-              {existingCategories.map((cat, idx) => (
-                <option key={idx} value={cat}>{cat}</option>
-              ))}
-              <option value="CREATE_NEW">Create New</option>
-            </select>
-          ) : (
+          {/* Name Field */}
+          <div className="relative flex items-center">
             <input
               type="text"
               className="border p-2 w-full"
-              placeholder="Category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
+            <button onClick={() => setShowNameHelp(!showNameHelp)} className="ml-1 text-gray-500">
+              ℹ️
+            </button>
+            {showNameHelp && (
+              <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+                Item Name
+              </div>
+            )}
+          </div>
+          {/* Category Field */}
+          {existingCategories.length > 0 && !isCreatingCategory ? (
+            <div className="relative flex items-center">
+              <select
+                className="border p-2 w-full"
+                value={category}
+                onChange={(e) => {
+                  if (e.target.value === 'CREATE_NEW') {
+                    setIsCreatingCategory(true);
+                    setCategory('');
+                  } else {
+                    setCategory(e.target.value);
+                  }
+                }}
+              >
+                <option value="">Select Category</option>
+                {existingCategories.map((cat, idx) => (
+                  <option key={idx} value={cat}>{cat}</option>
+                ))}
+                <option value="CREATE_NEW">Create New</option>
+              </select>
+              <button onClick={() => setShowCategoryHelp(!showCategoryHelp)} className="ml-1 text-gray-500">
+                ℹ️
+              </button>
+              {showCategoryHelp && (
+                <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+                  Category
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                className="border p-2 w-full"
+                placeholder="Category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              />
+              <button onClick={() => setShowCategoryHelp(!showCategoryHelp)} className="ml-1 text-gray-500">
+                ℹ️
+              </button>
+              {showCategoryHelp && (
+                <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+                  Category
+                </div>
+              )}
+            </div>
           )}
-          <input
-            type="number"
-            className="border p-2 w-full"
-            placeholder="Price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-          />
-          <input
-            type="number"
-            className="border p-2 w-full"
-            placeholder="Discount Amount"
-            value={discount}
-            onChange={(e) => setDiscount(e.target.value)}
-          />
+          {/* Price Field */}
+          <div className="relative flex items-center">
+            <input
+              type="number"
+              className="border p-2 w-full"
+              placeholder="Price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
+            <button onClick={() => setShowPriceHelp(!showPriceHelp)} className="ml-1 text-gray-500">
+              ℹ️
+            </button>
+            {showPriceHelp && (
+              <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+                Price (in $)
+              </div>
+            )}
+          </div>
+          {/* Discount Field */}
+          <div className="relative flex items-center">
+            <input
+              type="number"
+              className="border p-2 w-full"
+              placeholder="Discount Amount ($)"
+              value={discount}
+              onChange={(e) => setDiscount(e.target.value)}
+            />
+            <button onClick={() => setShowDiscountHelp(!showDiscountHelp)} className="ml-1 text-gray-500">
+              ℹ️
+            </button>
+            {showDiscountHelp && (
+              <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+                Discount is the dollar amount to subtract.
+              </div>
+            )}
+          </div>
+          {/* File Upload Field */}
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setFile(e.target.files[0] || null)}
           />
+          {/* Special & Disabled Fields */}
           <div className="flex items-center space-x-2">
             <label className="flex items-center">
               <input
@@ -171,9 +230,9 @@ function AddItemModal({ onClose, onAdd, existingCategories }) {
   );
 }
 
-/* ======================
+/* ==================================================
    ADMIN ITEM CARD (INLINE EDITING)
-   ====================== */
+   ================================================== */
 function AdminItemCard({ item, onUpdate, onDelete, categories: existingCategories }) {
   const [editName, setEditName] = useState(item.name);
   const [editCategory, setEditCategory] = useState(item.category);
@@ -182,11 +241,17 @@ function AdminItemCard({ item, onUpdate, onDelete, categories: existingCategorie
   const [editDiscount, setEditDiscount] = useState(item.discount);
   const [isSpecial, setIsSpecial] = useState(item.isSpecial);
   const [disabled, setDisabled] = useState(item.disabled);
+  const [showNameHelp, setShowNameHelp] = useState(false);
+  const [showCategoryHelp, setShowCategoryHelp] = useState(false);
+  const [showPriceHelp, setShowPriceHelp] = useState(false);
+  const [showDiscountHelp, setShowDiscountHelp] = useState(false);
+
   const fileRef = useRef(null);
 
-  // Image upload handling
   const handleImageClick = () => {
-    fileRef.current && fileRef.current.click();
+    if (fileRef.current) {
+      fileRef.current.click();
+    }
   };
 
   const handleFileChange = (e) => {
@@ -197,7 +262,6 @@ function AdminItemCard({ item, onUpdate, onDelete, categories: existingCategorie
     }
   };
 
-  // Auto-save on blur: update fields in parent component
   const handleAutoSave = (additionalFields = {}) => {
     onUpdate({
       ...item,
@@ -211,43 +275,62 @@ function AdminItemCard({ item, onUpdate, onDelete, categories: existingCategorie
     });
   };
 
-  // For category: render dropdown if categories exist
   const renderCategoryField = () => {
     if (existingCategories.length > 0 && !isCreatingCategory) {
       return (
-        <select
-          className="border-b w-full focus:outline-none"
-          value={editCategory}
-          onChange={(e) => {
-            if (e.target.value === 'CREATE_NEW') {
-              setIsCreatingCategory(true);
-              setEditCategory('');
-            } else {
-              setEditCategory(e.target.value);
-            }
-          }}
-          onBlur={handleAutoSave}
-        >
-          <option value="">Select Category</option>
-          {existingCategories.map((cat, idx) => (
-            <option key={idx} value={cat}>{cat}</option>
-          ))}
-          <option value="CREATE_NEW">Create New</option>
-        </select>
+        <div className="relative flex items-center">
+          <select
+            className="border-b w-full focus:outline-none"
+            value={editCategory}
+            onChange={(e) => {
+              if (e.target.value === 'CREATE_NEW') {
+                setIsCreatingCategory(true);
+                setEditCategory('');
+              } else {
+                setEditCategory(e.target.value);
+              }
+            }}
+            onBlur={handleAutoSave}
+          >
+            <option value="">Select Category</option>
+            {existingCategories.map((cat, idx) => (
+              <option key={idx} value={cat}>{cat}</option>
+            ))}
+            <option value="CREATE_NEW">Create New</option>
+          </select>
+          <button onClick={() => setShowCategoryHelp(!showCategoryHelp)} className="ml-1 text-gray-500">
+            ℹ️
+          </button>
+          {showCategoryHelp && (
+            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+              Category
+            </div>
+          )}
+        </div>
       );
     } else {
       return (
-        <input
-          type="text"
-          className="border-b w-full focus:outline-none"
-          placeholder="Category"
-          value={editCategory}
-          onChange={(e) => setEditCategory(e.target.value)}
-          onBlur={() => {
-            setIsCreatingCategory(false);
-            handleAutoSave();
-          }}
-        />
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            className="border-b w-full focus:outline-none"
+            placeholder="Category"
+            value={editCategory}
+            onChange={(e) => setEditCategory(e.target.value)}
+            onBlur={() => {
+              setIsCreatingCategory(false);
+              handleAutoSave();
+            }}
+          />
+          <button onClick={() => setShowCategoryHelp(!showCategoryHelp)} className="ml-1 text-gray-500">
+            ℹ️
+          </button>
+          {showCategoryHelp && (
+            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+              Category
+            </div>
+          )}
+        </div>
       );
     }
   };
@@ -270,33 +353,67 @@ function AdminItemCard({ item, onUpdate, onDelete, categories: existingCategorie
           onChange={handleFileChange}
         />
       </div>
-      {/* Inline editing fields */}
+      {/* Inline Editing Fields */}
       <div className="p-2 flex-grow space-y-1">
-        <input
-          type="text"
-          className="font-semibold text-lg w-full border-b focus:outline-none"
-          value={editName}
-          onChange={(e) => setEditName(e.target.value)}
-          onBlur={handleAutoSave}
-        />
+        {/* Name Field */}
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            className="font-semibold text-lg w-full border-b focus:outline-none"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onBlur={handleAutoSave}
+          />
+          <button onClick={() => setShowNameHelp(!showNameHelp)} className="ml-1 text-gray-500">
+            ℹ️
+          </button>
+          {showNameHelp && (
+            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+              Item Name
+            </div>
+          )}
+        </div>
         {renderCategoryField()}
-        <input
-          type="number"
-          className="w-full border-b focus:outline-none"
-          value={editPrice}
-          onChange={(e) => setEditPrice(e.target.value)}
-          onBlur={handleAutoSave}
-        />
-        <input
-          type="number"
-          className="w-full border-b focus:outline-none"
-          placeholder="Discount Amount"
-          value={editDiscount}
-          onChange={(e) => setEditDiscount(e.target.value)}
-          onBlur={handleAutoSave}
-        />
-        <div className="flex items-center space-x-2 text-sm mt-1">
-          <label className="flex items-center">
+        {/* Price Field */}
+        <div className="relative flex items-center">
+          <input
+            type="number"
+            className="w-full border-b focus:outline-none"
+            value={editPrice}
+            onChange={(e) => setEditPrice(e.target.value)}
+            onBlur={handleAutoSave}
+          />
+          <button onClick={() => setShowPriceHelp(!showPriceHelp)} className="ml-1 text-gray-500">
+            ℹ️
+          </button>
+          {showPriceHelp && (
+            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+              Price (in $)
+            </div>
+          )}
+        </div>
+        {/* Discount Field */}
+        <div className="relative flex items-center">
+          <input
+            type="number"
+            className="w-full border-b focus:outline-none"
+            placeholder=""
+            value={editDiscount}
+            onChange={(e) => setEditDiscount(e.target.value)}
+            onBlur={handleAutoSave}
+          />
+          <button onClick={() => setShowDiscountHelp(!showDiscountHelp)} className="ml-1 text-gray-500">
+            ℹ️
+          </button>
+          {showDiscountHelp && (
+            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
+              Discount Amount ($)
+            </div>
+          )}
+        </div>
+        {/* Special & Disabled Toggle */}
+        <div className="flex items-center space-x-2 mt-1">
+          <label className="flex items-center text-sm">
             <input
               type="checkbox"
               checked={isSpecial}
@@ -307,7 +424,7 @@ function AdminItemCard({ item, onUpdate, onDelete, categories: existingCategorie
             />
             <span className="ml-1">Special</span>
           </label>
-          <label className="flex items-center">
+          <label className="flex items-center text-sm">
             <input
               type="checkbox"
               checked={disabled}
@@ -320,7 +437,6 @@ function AdminItemCard({ item, onUpdate, onDelete, categories: existingCategorie
           </label>
         </div>
       </div>
-      {/* Delete button */}
       <button
         onClick={() => onDelete(item.id)}
         className="w-full py-2 bg-red-600 text-white hover:bg-red-700 transition-colors"
@@ -331,11 +447,10 @@ function AdminItemCard({ item, onUpdate, onDelete, categories: existingCategorie
   );
 }
 
-/* ======================
+/* ==================================================
    MAIN APP COMPONENT
-   ====================== */
+   ================================================== */
 const App = () => {
-  // Initialize mock data with added fields: discount, isSpecial, disabled.
   const [items, setItems] = useState(() => {
     return Array.from({ length: 6 }, (_, i) => ({
       id: i + 1,
@@ -354,37 +469,36 @@ const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-
-  // Derive dynamic categories from items
-  const dynamicCategories = Array.from(new Set(items.map(item => item.category))).filter(Boolean).sort();
-  const allCategories = dynamicCategories; // For admin dropdown
-
   const [activeCategory, setActiveCategory] = useState('All');
 
-  // Filtered items for customer view:
-  // Exclude disabled items and specials (special items appear separately)
+  const dynamicCategories = Array.from(new Set(items.map(item => item.category))).filter(Boolean).sort();
+  const allCategories = dynamicCategories;
+
+  const customerCategories = Array.from(new Set(
+    items.filter(item => !item.disabled && !item.isSpecial).map(item => item.category)
+  )).sort();
+
   const displayedItems =
     activeCategory === 'All'
       ? items.filter(item => !item.disabled && !item.isSpecial)
       : items.filter(item => item.category === activeCategory && !item.disabled && !item.isSpecial);
 
-  // Cart logic
   const addToCart = (item) => {
-    const existingItem = cart.find(ci => ci.id === item.id);
-    if (existingItem) {
+    const existing = cart.find(ci => ci.id === item.id);
+    if (existing) {
       setCart(cart.map(ci => ci.id === item.id ? { ...ci, quantity: ci.quantity + 1 } : ci));
     } else {
       setCart([...cart, { ...item, quantity: 1 }]);
     }
   };
 
-  const removeFromCart = (itemId) => {
-    setCart(cart.filter(ci => ci.id !== itemId));
+  const removeFromCart = (id) => {
+    setCart(cart.filter(ci => ci.id !== id));
   };
 
-  const updateQuantity = (itemId, amount) => {
+  const updateQuantity = (id, amount) => {
     setCart(cart.map(ci => {
-      if (ci.id === itemId) {
+      if (ci.id === id) {
         const newQty = ci.quantity + amount;
         return newQty > 0 ? { ...ci, quantity: newQty } : ci;
       }
@@ -394,7 +508,6 @@ const App = () => {
 
   const cartTotal = cart.reduce((total, ci) => total + (parseFloat(ci.price) * ci.quantity), 0);
 
-  // Admin related handlers
   const handleAdminLogin = () => setShowLoginModal(true);
   const handleAdminSuccess = () => {
     setIsAdmin(true);
@@ -409,20 +522,13 @@ const App = () => {
     setItems(prev => prev.map(it => it.id === updatedItem.id ? updatedItem : it));
   };
 
-  const handleDeleteItem = (itemId) => {
-    setItems(prev => prev.filter(it => it.id !== itemId));
+  const handleDeleteItem = (id) => {
+    setItems(prev => prev.filter(it => it.id !== id));
   };
-
-  // For category filter buttons (customer view), derive categories from items that are not disabled.
-  const customerCategories = Array.from(new Set(
-    items.filter(item => !item.disabled && !item.isSpecial).map(item => item.category)
-  )).sort();
 
   return (
     <div className="flex h-screen">
-      {/* Main Content (80%) */}
       <div className="w-4/5 flex flex-col h-full">
-        {/* Header */}
         <div className="p-4 bg-blue-600 text-white flex justify-between items-center">
           <h1 className="text-3xl font-bold">World Cafe Menu</h1>
           {!isAdmin ? (
@@ -435,11 +541,9 @@ const App = () => {
             </button>
           )}
         </div>
-        
-        {/* Category Filter (Customer Mode Only) */}
         {!isAdmin && (
           <div className="p-2 bg-gray-100 flex space-x-2 items-center">
-            {['All', ...customerCategories].map((cat) => (
+            {['All', ...customerCategories].map(cat => (
               <button
                 key={cat}
                 className={`px-3 py-1 rounded ${activeCategory === cat ? 'bg-blue-600 text-white' : 'bg-white'}`}
@@ -450,8 +554,6 @@ const App = () => {
             ))}
           </div>
         )}
-        
-        {/* Main Grid */}
         <div className="flex-grow overflow-y-auto p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {isAdmin
@@ -475,7 +577,6 @@ const App = () => {
                         alt={item.name}
                         className="w-full h-full object-cover"
                       />
-                      {/* If discount is applied, show the discount badge */}
                       {item.discount > 0 && (
                         <span className="absolute top-0 right-0 bg-green-500 text-white text-xs px-2 py-1">
                           Discount
@@ -489,9 +590,7 @@ const App = () => {
                         {item.discount > 0 ? (
                           <div>
                             <span className="line-through text-red-500 mr-2">${item.price}</span>
-                            <span className="font-bold text-blue-600">
-                              ${ (item.price - item.discount).toFixed(2) }
-                            </span>
+                            <span className="font-bold text-blue-600">${(item.price - item.discount).toFixed(2)}</span>
                           </div>
                         ) : (
                           <div className="font-bold text-blue-600">${item.price}</div>
@@ -509,24 +608,34 @@ const App = () => {
             }
           </div>
         </div>
-        
-        {/* Bottom Section */}
         {!isAdmin && (
           <div className="p-3 bg-yellow-50 border-t border-yellow-200">
             <h3 className="text-lg font-medium text-yellow-800">Limited Time Specials</h3>
             <div className="flex space-x-4 overflow-x-auto py-2">
               {items.filter(it => it.isSpecial && !it.disabled).slice(0, 5).map(it => (
-                <div key={`special-${it.id}`} className="flex-shrink-0 w-32 text-center">
-                  <div className="h-20 w-20 bg-white rounded-full mx-auto mb-1 overflow-hidden">
+                <div key={`special-${it.id}`} className="flex-shrink-0 w-32 text-center relative">
+                  <div className="h-20 w-20 bg-white rounded-full mx-auto mb-1 overflow-hidden relative">
                     <img
                       src={it.imagePath}
                       alt={it.name}
                       className="w-full h-full object-cover"
                     />
+                    {it.discount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs px-1 rounded">
+                        Save ${it.discount}
+                      </span>
+                    )}
                   </div>
                   <div className="text-sm font-medium">{it.name}</div>
-                  <div className="text-xs font-bold text-blue-600">
-                    {it.discount > 0 ? `$${(it.price - it.discount).toFixed(2)}` : `$${it.price}`}
+                  <div className="text-xs">
+                    {it.discount > 0 ? (
+                      <>
+                        <span className="line-through text-red-500 mr-1">${it.price}</span>
+                        <span className="font-bold text-blue-600">${(it.price - it.discount).toFixed(2)}</span>
+                      </>
+                    ) : (
+                      <span className="font-bold text-blue-600">${it.price}</span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -534,8 +643,6 @@ const App = () => {
           </div>
         )}
       </div>
-      
-      {/* Sidebar: Cart (Customer) or Admin Panel */}
       <div className="w-1/5 bg-gray-100 border-l border-gray-300 flex flex-col h-full">
         {isAdmin ? (
           <div className="p-4">
@@ -546,7 +653,6 @@ const App = () => {
             >
               Add Item
             </button>
-            {/* Additional admin controls can be added here */}
           </div>
         ) : (
           <>
@@ -562,14 +668,11 @@ const App = () => {
                 cart.map((ci) => (
                   <div key={`cart-${ci.id}`} className="flex items-center justify-between mb-3 bg-white p-2 rounded shadow-sm">
                     <div className="flex items-center">
-                      {/* Thumbnail for cart */}
                       <img src={ci.imagePath} alt={ci.name} className="h-8 w-8 object-cover mr-2" />
                       <div>
                         <div className="font-medium">{ci.name}</div>
                         <div className="text-sm text-gray-600">
-                          ${ci.discount > 0
-                            ? (ci.price - ci.discount).toFixed(2)
-                            : ci.price} × {ci.quantity}
+                          ${ci.discount > 0 ? (ci.price - ci.discount).toFixed(2) : ci.price} × {ci.quantity}
                         </div>
                       </div>
                     </div>
@@ -611,8 +714,6 @@ const App = () => {
           </>
         )}
       </div>
-
-      {/* Modals */}
       {showLoginModal && (
         <AdminLoginModal
           onClose={() => setShowLoginModal(false)}
