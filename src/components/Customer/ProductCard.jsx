@@ -2,6 +2,7 @@
 import React from 'react';
 
 export default function ProductCard({ item, onAddToCart }) {
+  const effectivePrice = Math.max(item.price - item.discount, 0).toFixed(2);
   return (
     <div className="bg-white border shadow rounded overflow-hidden flex flex-col">
       <div className="h-32 bg-gray-200 relative">
@@ -19,7 +20,7 @@ export default function ProductCard({ item, onAddToCart }) {
           {item.discount > 0 ? (
             <div>
               <span className="line-through text-red-500 mr-2">${item.price}</span>
-              <span className="font-bold text-blue-600">${(item.price - item.discount).toFixed(2)}</span>
+              <span className="font-bold text-blue-600">${effectivePrice}</span>
             </div>
           ) : (
             <div className="font-bold text-blue-600">${item.price}</div>

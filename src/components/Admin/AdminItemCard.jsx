@@ -30,12 +30,16 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
   };
 
   const handleAutoSave = (additionalFields = {}) => {
+    // Clamp discount so effective price >= 0.
+    const discountVal = parseFloat(editDiscount) || 0;
+    const priceVal = parseFloat(editPrice) || 0;
+    const clampedDiscount = Math.min(discountVal, priceVal);
     onUpdate({
       ...item,
       name: editName,
       category: editCategory,
-      price: parseFloat(editPrice) || 0,
-      discount: parseFloat(editDiscount) || 0,
+      price: priceVal,
+      discount: clampedDiscount,
       isSpecial,
       disabled,
       ...additionalFields,
@@ -84,7 +88,10 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
             placeholder="Category"
             value={editCategory}
             onChange={(e) => setEditCategory(e.target.value)}
-            onBlur={() => { setIsCreatingCategory(false); handleAutoSave(); }}
+            onBlur={() => {
+              setIsCreatingCategory(false);
+              handleAutoSave();
+            }}
           />
           <button onClick={() => setShowCategoryHelp(!showCategoryHelp)} className="ml-1 text-gray-500">
             ℹ️
@@ -101,6 +108,7 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
 
   return (
     <div className="bg-white border shadow rounded overflow-hidden flex flex-col">
+      {/* Image Section */}
       <div className="h-32 bg-gray-200 relative">
         <img
           src={item.imagePath}
@@ -108,16 +116,10 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
           className="w-full h-full object-cover cursor-pointer"
           onClick={handleImageClick}
         />
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileRef}
-          className="hidden"
-          onChange={handleFileChange}
-        />
+        <input type="file" accept="image/*" ref={fileRef} className="hidden" onChange={handleFileChange} />
       </div>
       <div className="p-2 flex-grow space-y-1">
-        {/* Item Name Field */}
+        {/* Name Field */}
         <div className="relative flex items-center">
           <input
             type="text"
@@ -168,7 +170,7 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
           </button>
           {showDiscountHelp && (
             <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
-              Discount Amount ($)
+              Discount
             </div>
           )}
         </div>

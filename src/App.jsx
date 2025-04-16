@@ -50,15 +50,13 @@ function App() {
   const removeFromCart = (id) => setCart(cart.filter((ci) => ci.id !== id));
 
   const updateQuantity = (id, amount) => {
-    setCart(
-      cart.map((ci) => {
-        if (ci.id === id) {
-          const newQty = ci.quantity + amount;
-          return newQty > 0 ? { ...ci, quantity: newQty } : ci;
-        }
-        return ci;
-      })
-    );
+    setCart(cart.map((ci) => {
+      if (ci.id === id) {
+        const newQty = ci.quantity + amount;
+        return newQty > 0 ? { ...ci, quantity: newQty } : ci;
+      }
+      return ci;
+    }));
   };
 
   const cartTotal = cart.reduce((total, ci) => total + (ci.price * ci.quantity), 0);
@@ -98,9 +96,7 @@ function App() {
             {['All', ...customerCategories].map((cat) => (
               <button
                 key={cat}
-                className={`px-3 py-1 rounded ${
-                  activeCategory === cat ? 'bg-blue-600 text-white' : 'bg-white'
-                }`}
+                className={`px-3 py-1 rounded ${activeCategory === cat ? 'bg-blue-600 text-white' : 'bg-white'}`}
                 onClick={() => setActiveCategory(cat)}
               >
                 {cat}
@@ -127,7 +123,19 @@ function App() {
         </div>
         {!isAdmin && <LimitedSpecials items={items.filter((it) => it.isSpecial && !it.disabled)} />}
       </div>
-      <CartSidebar cart={cart} cartTotal={cartTotal} updateQuantity={updateQuantity} removeFromCart={removeFromCart} clearCart={clearCart} />
+      {isAdmin ? (
+        <div className="w-1/5 bg-gray-100 border-l border-gray-300 flex flex-col h-full">
+          <div className="p-4">
+            <h2 className="text-xl font-bold mb-3">Admin Panel</h2>
+            <button onClick={() => setShowAddModal(true)} className="block w-full mb-4 py-2 bg-green-600 text-white rounded">
+              Add Item
+            </button>
+            {/* Additional admin controls can go here */}
+          </div>
+        </div>
+      ) : (
+        <CartSidebar cart={cart} cartTotal={cartTotal} updateQuantity={updateQuantity} removeFromCart={removeFromCart} clearCart={clearCart} />
+      )}
       {showLoginModal && (
         <AdminLoginModal onClose={() => setShowLoginModal(false)} onSuccess={handleAdminSuccess} />
       )}

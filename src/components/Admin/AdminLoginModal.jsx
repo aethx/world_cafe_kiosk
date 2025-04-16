@@ -1,12 +1,13 @@
 // src/components/Admin/AdminLoginModal.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function AdminLoginModal({ onClose, onSuccess }) {
   const [pin, setPin] = useState('');
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    // Clear the PIN input on mount.
     setPin('');
+    inputRef.current && inputRef.current.focus();
   }, []);
 
   const handleSubmit = () => {
@@ -14,7 +15,8 @@ export default function AdminLoginModal({ onClose, onSuccess }) {
       onSuccess();
     } else {
       alert('Incorrect PIN!');
-      setPin(''); // Reset immediately on wrong PIN.
+      setPin('');
+      inputRef.current && inputRef.current.focus();
     }
   };
 
@@ -28,7 +30,7 @@ export default function AdminLoginModal({ onClose, onSuccess }) {
       <div className="bg-white p-4 rounded shadow-md w-64">
         <h2 className="text-lg font-bold mb-2">Enter Admin PIN</h2>
         <input
-          autoFocus
+          ref={inputRef}
           type="password"
           className="border p-2 w-full mb-3"
           value={pin}

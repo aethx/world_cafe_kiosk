@@ -18,7 +18,7 @@ export default function CartSidebar({ cart, cartTotal, updateQuantity, removeFro
                 <div>
                   <div className="font-medium">{ci.name}</div>
                   <div className="text-sm text-gray-600">
-                    ${ci.discount > 0 ? (ci.price - ci.discount).toFixed(2) : ci.price} × {ci.quantity}
+                    ${ci.discount > 0 ? Math.max(ci.price - ci.discount, 0).toFixed(2) : ci.price} × {ci.quantity}
                   </div>
                 </div>
               </div>
