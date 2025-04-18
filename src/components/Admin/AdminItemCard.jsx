@@ -10,11 +10,6 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
   const [isSpecial, setIsSpecial] = useState(item.isSpecial);
   const [disabled, setDisabled] = useState(item.disabled);
 
-  const [showNameHelp, setShowNameHelp] = useState(false);
-  const [showCategoryHelp, setShowCategoryHelp] = useState(false);
-  const [showPriceHelp, setShowPriceHelp] = useState(false);
-  const [showDiscountHelp, setShowDiscountHelp] = useState(false);
-
   const fileRef = useRef(null);
 
   const handleImageClick = () => {
@@ -30,7 +25,6 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
   };
 
   const handleAutoSave = (additionalFields = {}) => {
-    // Clamp discount so effective price >= 0.
     const discountVal = parseFloat(editDiscount) || 0;
     const priceVal = parseFloat(editPrice) || 0;
     const clampedDiscount = Math.min(discountVal, priceVal);
@@ -49,66 +43,49 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
   const renderCategoryField = () => {
     if (categories.length > 0 && !isCreatingCategory) {
       return (
-        <div className="relative flex items-center">
-          <select
-            className="border-b w-full focus:outline-none"
-            value={editCategory}
-            onChange={(e) => {
-              if (e.target.value === 'CREATE_NEW') {
-                setIsCreatingCategory(true);
-                setEditCategory('');
-              } else {
-                setEditCategory(e.target.value);
-              }
-            }}
-            onBlur={handleAutoSave}
-          >
-            <option value="">Select Category</option>
-            {categories.map((cat, idx) => (
-              <option key={idx} value={cat}>{cat}</option>
-            ))}
-            <option value="CREATE_NEW">Create New</option>
-          </select>
-          <button onClick={() => setShowCategoryHelp(!showCategoryHelp)} className="ml-1 text-gray-500">
-            ℹ️
-          </button>
-          {showCategoryHelp && (
-            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
-              Item Category
-            </div>
-          )}
-        </div>
+        <select
+          className="border-b w-full focus:outline-none"
+          value={editCategory}
+          onChange={(e) => {
+            if (e.target.value === 'CREATE_NEW') {
+              setIsCreatingCategory(true);
+              setEditCategory('');
+            } else {
+              setEditCategory(e.target.value);
+            }
+          }}
+          onBlur={handleAutoSave}
+        >
+          <option value="">Select Category</option>
+          {categories.map((cat, idx) => (
+            <option key={idx} value={cat}>{cat}</option>
+          ))}
+          <option value="CREATE_NEW">Create New</option>
+        </select>
       );
     } else {
       return (
-        <div className="relative flex items-center">
-          <input
-            type="text"
-            className="border-b w-full focus:outline-none"
-            placeholder="Category"
-            value={editCategory}
-            onChange={(e) => setEditCategory(e.target.value)}
-            onBlur={() => {
-              setIsCreatingCategory(false);
-              handleAutoSave();
-            }}
-          />
-          <button onClick={() => setShowCategoryHelp(!showCategoryHelp)} className="ml-1 text-gray-500">
-            ℹ️
-          </button>
-          {showCategoryHelp && (
-            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
-              Item Category
-            </div>
-          )}
-        </div>
+        <input
+          type="text"
+          className="border-b w-full focus:outline-none"
+          placeholder="Category"
+          value={editCategory}
+          onChange={(e) => setEditCategory(e.target.value)}
+          onBlur={() => {
+            setIsCreatingCategory(false);
+            handleAutoSave();
+          }}
+        />
       );
     }
   };
 
+  const renderIcon = (label, type) => (
+    <span className={`inline-flex justify-center items-center w-5 h-5 text-xs font-bold text-white rounded-full mr-1 ${type}`}>{label}</span>
+  );
+
   return (
     <div className="bg-white border shadow rounded overflow-hidden flex flex-col">
-      {/* Image Section */}
       <div className="h-32 bg-gray-200 relative">
         <img
           src={item.imagePath}
@@ -118,28 +95,23 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
         />
         <input type="file" accept="image/*" ref={fileRef} className="hidden" onChange={handleFileChange} />
       </div>
-      <div className="p-2 flex-grow space-y-1">
-        {/* Name Field */}
-        <div className="relative flex items-center">
+      <div className="p-2 flex-grow space-y-1 text-sm">
+        <div className="flex items-center">
+          {renderIcon('I', 'bg-blue-500')}
           <input
             type="text"
-            className="font-semibold text-lg w-full border-b focus:outline-none"
+            className="font-semibold w-full border-b focus:outline-none"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
             onBlur={handleAutoSave}
           />
-          <button onClick={() => setShowNameHelp(!showNameHelp)} className="ml-1 text-gray-500">
-            ℹ️
-          </button>
-          {showNameHelp && (
-            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
-              Item Name
-            </div>
-          )}
         </div>
-        {renderCategoryField()}
-        {/* Price Field */}
-        <div className="relative flex items-center">
+        <div className="flex items-center">
+          {renderIcon('C', 'bg-purple-600')}
+          {renderCategoryField()}
+        </div>
+        <div className="flex items-center">
+          {renderIcon('P', 'bg-orange-500')}
           <input
             type="number"
             className="w-full border-b focus:outline-none"
@@ -147,17 +119,9 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
             onChange={(e) => setEditPrice(e.target.value)}
             onBlur={handleAutoSave}
           />
-          <button onClick={() => setShowPriceHelp(!showPriceHelp)} className="ml-1 text-gray-500">
-            ℹ️
-          </button>
-          {showPriceHelp && (
-            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
-              Price (in $)
-            </div>
-          )}
         </div>
-        {/* Discount Field */}
-        <div className="relative flex items-center">
+        <div className="flex items-center">
+          {renderIcon('D', 'bg-green-600')}
           <input
             type="number"
             className="w-full border-b focus:outline-none"
@@ -165,16 +129,7 @@ export default function AdminItemCard({ item, onUpdate, onDelete, categories }) 
             onChange={(e) => setEditDiscount(e.target.value)}
             onBlur={handleAutoSave}
           />
-          <button onClick={() => setShowDiscountHelp(!showDiscountHelp)} className="ml-1 text-gray-500">
-            ℹ️
-          </button>
-          {showDiscountHelp && (
-            <div className="absolute top-full left-0 mt-1 p-1 bg-gray-700 text-white text-xs rounded">
-              Discount
-            </div>
-          )}
         </div>
-        {/* Special & Disabled toggles */}
         <div className="flex items-center space-x-2 mt-1">
           <label className="flex items-center text-sm">
             <input
