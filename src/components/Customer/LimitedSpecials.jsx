@@ -1,7 +1,7 @@
 // src/components/Customer/LimitedSpecials.jsx
 import React from 'react';
 
-export default function LimitedSpecials({ items }) {
+export default function LimitedSpecials({ items, onAddToCart }) {
   return (
     <div className="p-3 bg-yellow-50 border-t border-yellow-200">
       <h3 className="text-lg font-medium text-yellow-800">Limited Time Specials</h3>
@@ -34,6 +34,12 @@ export default function LimitedSpecials({ items }) {
                   <span className="font-bold text-blue-600">${it.price}</span>
                 )}
               </div>
+              <button
+                onClick={() => onAddToCart(it)}
+                className="mt-1 bg-blue-600 text-white text-xs px-2 py-1 rounded"
+              >
+                Add to Cart
+              </button>
             </div>
           );
         })}
